@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Directions Finder</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            padding: 20px;
+        }
+        table {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Get Directions</h1>
+        <form id="directions-form">
+            <div class="form-group">
+                <label for="from">From:</label>
+                <input type="text" id="from" class="form-control" placeholder="Enter starting location" required>
+            </div>
+            <div class="form-group">
+                <label for="to">To:</label>
+                <input type="text" id="to" class="form-control" placeholder="Enter destination" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Get Directions</button>
+        </form>
+
+        <div id="result" class="mt-4"></div>
+    </div>
+
+    <script>
+        document.getElementById('directions-form').addEventListener('submit', async function(event) {
+            event.preventDefault();
+            const from = document.getElementById('from').value;
+            const to = document.getElementById('to').value;
+
+            const response = await fetch(`/directions?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`);
+            const data = await response.json();
+
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '';
+
+            if (response.ok) {
+                const { trip_duration, kilometers, maneuvers } = data;
+                let tableHtml = `
+                    <h2>Directions from ${from} to ${to}</h2>
+                    <p>Trip Duration: ${trip_duration}</p>
+                    <p>Distance: ${kilometers} km</p>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Step</th>
+                                <th>Narrative</th>
+                                <th>Distance (km)</th>
+                            </tr>
+                        </thead>
+                        <tbody>`;
+                
+                maneuvers.forEach((maneuver, index) => {
+                    tableHtml += `
+                        <tr>
+                            <td>${index + 1}</td>
+                            <td>${maneuver.narrative}</td>
+                            <td>${maneuver.distance_km}</td>
+                        </tr>`;
+                });
+
+                tableHtml += `
+                        </tbody>
+                    </table>`;
+                resultDiv.innerHTML = tableHtml;
+            } else {
+                resultDiv.innerHTML = `<div class="alert alert-danger">${data.error}</div>`;
+            }
+        });
+    </script>
+</body>
+</html>
