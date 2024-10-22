@@ -32,14 +32,34 @@
         <div id="result" class="mt-4"></div>
     </div>
 
+    <!-- Loading Modal -->
+    <div class="modal fade" id="loadingModal" tabindex="-1" aria-labelledby="loadingModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-body text-center">
+                    <h5 class="modal-title" id="loadingModalLabel">Loading...</h5>
+                    <div class="spinner-border" role="status">
+                        <span class="sr-only">Loading...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         document.getElementById('directions-form').addEventListener('submit', async function(event) {
             event.preventDefault();
             const from = document.getElementById('from').value;
             const to = document.getElementById('to').value;
 
+            // Show loading modal
+            $('#loadingModal').modal('show');
+
             const response = await fetch(`/directions?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`);
             const data = await response.json();
+
+            // Hide loading modal
+            $('#loadingModal').modal('hide');
 
             const resultDiv = document.getElementById('result');
             resultDiv.innerHTML = '';
@@ -78,5 +98,9 @@
             }
         });
     </script>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
 </html>
