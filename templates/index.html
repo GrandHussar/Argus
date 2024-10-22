@@ -26,6 +26,13 @@
                 <label for="to">To:</label>
                 <input type="text" id="to" class="form-control" placeholder="Enter destination" required>
             </div>
+            <div class="form-group">
+                <label for="unit">Distance Unit:</label>
+                <select id="unit" class="form-control">
+                    <option value="km">Kilometers</option>
+                    <option value="miles">Miles</option>
+                </select>
+            </div>
             <button type="submit" class="btn btn-primary">Get Directions</button>
         </form>
 
@@ -51,11 +58,12 @@
             event.preventDefault();
             const from = document.getElementById('from').value;
             const to = document.getElementById('to').value;
+            const unit = document.getElementById('unit').value;
 
             // Show loading modal
             $('#loadingModal').modal('show');
 
-            const response = await fetch(`/directions?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`);
+            const response = await fetch(`/directions?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}&unit=${unit}`);
             const data = await response.json();
 
             // Hide loading modal
@@ -65,17 +73,17 @@
             resultDiv.innerHTML = '';
 
             if (response.ok) {
-                const { trip_duration, kilometers, maneuvers } = data;
+                const { trip_duration, distance, maneuvers } = data;
                 let tableHtml = `
                     <h2>Directions from ${from} to ${to}</h2>
                     <p>Trip Duration: ${trip_duration}</p>
-                    <p>Distance: ${kilometers} km</p>
+                    <p>Distance: ${distance} ${unit === 'km' ? 'km' : 'miles'}</p>
                     <table class="table">
                         <thead>
                             <tr>
                                 <th>Step</th>
                                 <th>Narrative</th>
-                                <th>Distance (km)</th>
+                                <th>Distance (${unit === 'km' ? 'km' : 'miles'})</th>
                             </tr>
                         </thead>
                         <tbody>`;
@@ -85,7 +93,7 @@
                         <tr>
                             <td>${index + 1}</td>
                             <td>${maneuver.narrative}</td>
-                            <td>${maneuver.distance_km}</td>
+                            <td>${maneuver.distance}</td>
                         </tr>`;
                 });
 

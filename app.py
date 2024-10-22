@@ -15,6 +15,7 @@ def index():
 def get_directions():
     orig = request.args.get('from')
     dest = request.args.get('to')
+    unit = request.args.get('unit', 'km')  # Default to kilometers
 
     if not orig or not dest:
         return jsonify({"error": "Missing 'from' or 'to' parameters."}), 400
@@ -24,16 +25,22 @@ def get_directions():
     
     json_status = json_data["info"]["statuscode"]
     if json_status == 0:
+        distance = json_data["route"]["distance"]
+        if unit == 'miles':
+            distance = round(distance, 2)  # Use original distance in miles
+        else:
+            distance = round(distance * 1.61, 2)  # Convert to kilometers
+        
         route_info = {
             "status": "success",
             "from": orig,
             "to": dest,
             "trip_duration": json_data["route"]["formattedTime"],
-            "kilometers": round(json_data["route"]["distance"] * 1.61, 2),
+            "distance": distance,
             "maneuvers": [
                 {
                     "narrative": each["narrative"],
-                    "distance_km": round(each["distance"] * 1.61, 2)
+                    "distance": round(each["distance"] * (1.61 if unit == 'km' else 1), 2)
                 }
                 for each in json_data["route"]["legs"][0]["maneuvers"]
             ]
